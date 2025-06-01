@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+			#box1{
+<!--				border: solid red 1px;-->
+				position:absolute;
+				top:5%;
+				left:5%;
+				width:500px;
+				height:400px;
+			}
+			#box2{
+				border:   1px;
+				position:absolute;
+				top:5%;
+				left:calc(35% - 25px);
+				width:500px;
+				height:400px;
+			}
+			#box3{
+				border:   1px;
+				position:absolute;
+				top:5%;
+				right:5%;
+				width:500px;
+				height:400px;
+			}
+			#box4{
+				border:  1px;
+				position:absolute;
+				top:60%;
+				left:5%;
+				width:500px;
+				height:400px;
+			}
+			#box5{
+				border:   1px;
+				position:absolute;
+				top:60%;
+				left:35%;
+				width:500px;
+				height:400px;
+			}
+			#box6{
+				border:   1px;
+				position:absolute;
+				top:60%;
+				right:5%;
+				width:600px;
+				height:400px;
+			}
+
+		</style>
+    <script src="../static/js/echarts.min.js"></script>
+	<!--    3d图形必须要导入这个库，否则不显示图形	-->
+	<!-- 引入 echarts-gl 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+	<!--     导入词云组件	-->
+	<script src="../static/js/echarts-wordcloud-2.1.0/dist/echarts-wordcloud.min.js"></script>
+</head>
+<body>
+<div id="box">
+			<div id="box1"></div>
+			<div id="box2"></div>
+			<div id="box3"></div>
+			<div id="box4"></div>
+			<div id="box5"></div>
+			<div id="box6"></div>
+		</div>
+<!--   js代码	-->
+	<script>
+	//	 图1：柱状图
+		//	初始化echarts
+		var mychart1=echarts.init(document.getElementById("box1"));
+		//	数据源 flask的写法，引入python的data1变量
+		var data1={{data1|tojson|safe}};
+		//	创建空的数组存储x和y轴的数据
+		var x_data=[];
+		var y_data=[];
+		//	这里的key是数组里面的索引(0,1,3......)
+		for(var key in data1){
+			x_data.push(data1[key]['name']);
+			y_data.push(data1[key]['value'])
+		};
+		//	检查数据
+<!--		console.log(value_data);-->
+		//	图形的设置
+		var option={
+			 //	标题的设置
+			title:[
+				//	第一个
+				{
+					text:"每种类型的小说的数量",
+					left:"center",
+					top:10
+				}
+			],
+			 xAxis: {
+				 type: 'category',
+				 data: x_data,
+				 axisLabel:{
+					 interval:0,	//	显示所有标签
+					 rotate: 45,  // 标签旋转45度（防重叠）
+    				 fontSize: 12 // 调整字体大小
+				 }
+  				},
+			  yAxis: {
+				type: 'value'
+			  },
+			  series: [
+				{
+				  data: y_data,
+				  type: 'bar'
+				}
+			  ]
+		};
+
+		//	展示图形1
+		mychart1.setOption(option);
+
+
+		//	图形2:饼图:完结和未完结占比图
+	//	初始化echarts
+	var mycharts2=echarts.init(document.getElementById("box2"));
+
+	//	拿到后端的数据
+	var data2={{data2|tojson|safe}};
+
+	//	创建空数组存储图形需要的数据
+	var dict_data=[];
+	//	这里的key是数组里面的索引(0,1,2...)
+	for(var key in data2){
+		dict_data.push(data2[key]);
+	};
+
+	//	饼图的图形配置
+		option = {
+		  title: {
+			text: '小说完结和未完结的占比图',
+			left: 'center'
+		  },
+		  tooltip: {
+			  trigger: 'item',
+			  formatter: '{a} <br/>{b}: {c} ({d}%)' // 提示框显示名称、数值和百分比
+		  },
+		  legend: {
+			orient: 'vertical',
+			left: 'left'
+		  },
+		  series: [
+			{
+			 	 name: '小说状态',
+			  	type: 'pie',
+			  	radius: '60%',
+				data: dict_data,
+				 label: {
+                    formatter: '{b}: {c} ({d}%)' // 标签显示名称、数值和百分比
+                },
+				emphasis: {
+				itemStyle: {
+				  shadowBlur: 10,
+				  shadowOffsetX: 0,
+				  shadowColor: 'rgba(0, 0, 0, 0.5)'
+				}
+		  }
+    }
+  ]
+
+};
+		//	展示图形2
+	mycharts2.setOption(option);
+
+	//	图形3:横向柱形图
+	var mycharts3=echarts.init(document.getElementById("box3"));
+	//	拿到后端的数据
+	var data3={{data3|tojson|safe}}
+	//	创建空数组拿到x轴和y轴的数据
+	var x_data3=[];
+	var y_data3=[];
+	//	拿到数据
+	for(var key in data3){
+		x_data3.push(data3[key]["value"]);
+		y_data3.push(data3[key]["name"]);
+	};
+	option = {
+  title: {
+    text: '各类型小说的平均字数(万为单位)'
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'value',
+    boundaryGap: [0, 0.01]
+  },
+  yAxis: {
+    type: 'category',
+    data: y_data3
+  },
+  series: [
+    {
+      name: '2011',
+      type: 'bar',
+      data: x_data3,
+	    label: {
+                show: true,
+                position: 'right',
+                formatter: '{c} 万字'  // 柱子上显示数值
+            },
+            itemStyle: {
+                color: '#5470C6'  // 自定义柱状图颜色
+            }
+    }
+  ]
+};
+
+	//	展示图形3
+	mycharts3.setOption(option);
+
+	//	图形4:环形图
+	var mycharts4=echarts.init(document.getElementById("box4"));
+	//	拿到后端的数据
+	var data4={{data4|tojson|safe}}
+	//	创建空数组拿到x轴和y轴的数据
+	var dict_data4=[];
+	//	拿到数据
+	for(var key in data4){
+		dict_data4.push(data4[key]);
+	};
+
+	//	环形图的配置参数
+	option = {
+		title: {
+        text: '用户总字数Top10',
+        left: 'center',
+        top: 0,
+        textStyle: {
+            fontSize: 18,
+            fontWeight: 'bold'
+        }
+    },
+  tooltip: {
+    trigger: 'item'
+  },
+  legend: {
+    top: '5%',
+    left: 'center'
+  },
+  series: [
+    {
+      name: '用户总字数Top10',
+      type: 'pie',
+      radius: ['30%', '70%'],
+		center: ['50%', '55%'],  // 图形整体下移
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 10,
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: {
+        show: false,
+        position: 'center'
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: 40,
+          fontWeight: 'bold'
+        }
+      },
+		 emphasis: {
+                label: {
+                    show: true,
+                    fontSize: 18,  // 适当减小强调时的字体大小
+                    fontWeight: 'bold',
+                    formatter: '{b}: {c} 万字\n({d}%)'  // 强调时显示百分比
+                }
+            },
+      labelLine: {
+        show: false
+      },
+      data: dict_data4
+    }
+  ]
+};
+
+	//	展示图形4
+	mycharts4.setOption(option);
+
+
+	//	图形5:词云图
+	var mycharts5=echarts.init(document.getElementById("box5"));
+	//	拿到后端的数据
+	var data5={{data5|tojson|safe}}
+	// 词云图的配置
+        var option = {
+        	title:{
+						text:'男生看的小说类型词云图',
+						left:'center',
+						top:5
+					},
+            series: [{
+                type: 'wordCloud',
+                shape: 'circle',
+                gridSize: 30,
+                sizeRange: [20, 70], // 字体大小范围
+                 rotationRange: [-30, 30], // 减小旋转幅度
+                textStyle: {
+                    normal: {
+                        color: function () {
+                            return 'rgb(' + [
+                                Math.round(Math.random() * 255),
+                                Math.round(Math.random() * 255),
+                                Math.round(Math.random() * 255)
+                            ].join(',') + ')';
+                        }
+                    }
+                },
+                data: data5
+            }]
+        };
+
+
+	//	展示图形5
+	mycharts5.setOption(option);
+
+
+	//	图形5:词云图
+	var mycharts6=echarts.init(document.getElementById("box6"));
+	//	拿到后端的数据
+	var data6={{data6|tojson|safe}}
+        // This example requires ECharts v5.5.0 or later
+option = {
+		title: {
+        text: '女生看的小说类型占比',
+        left: 'center',
+        top: '0%',
+        textStyle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: '#333'
+        }
+    },
+  tooltip: {
+    trigger: 'item'
+  },
+  legend: {
+    top: '20%',
+    left: 'center'
+  },
+  series: [
+    {
+      name: 'Access From',
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '70%'],
+      // adjust the start and end angle
+      startAngle: 180,
+      endAngle: 360,
+      data: data6
+    }
+  ]
+};
+
+
+	//	展示图形6
+	mycharts6.setOption(option);
+
+
+
+	</script>
+</body>
+</html>
